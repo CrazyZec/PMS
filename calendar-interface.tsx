@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { ChevronLeft, ChevronRight, Search, RefreshCw, Filter, MoreHorizontal, Calendar, Hotel, Tag, FileText, User, Flag, X, Info, Minus, Plus } from 'lucide-react'
-import ReservationEditView from './reservation-edit-view'
 
 interface Booking {
   id: number
@@ -16,21 +15,6 @@ interface DateRange {
   end: Date
 }
 
-const properties = [
-  { id: 1, name: 'PARKPLATZ' },
-  { id: 2, name: 'I LOVE IS IN THE AIR' },
-  { id: 3, name: 'CRAZY LOVE' },
-  { id: 4, name: 'DREAM, DREAM, DREAM' },
-  { id: 5, name: 'MY ONLY SUNSHINE' },
-  { id: 6, name: 'MADE FOR ME AND YOU' },
-  { id: 7, name: 'WONDERFUL TONIGHT' },
-  { id: 8, name: 'WAITING FOR LOVE' },
-  { id: 9, name: 'SOUND OF LOVE' },
-  { id: 10, name: 'FEELING GOOD' },
-  { id: 11, name: 'FIELDS OF GOLD' },
-  { id: 12, name: 'LET THERE BE LOVE' },
-]
-
 const ReservationForm = ({ onClose, selectedDateRange, selectedProperty, onAddBooking }: { 
   onClose: () => void, 
   selectedDateRange: DateRange, 
@@ -43,52 +27,20 @@ const ReservationForm = ({ onClose, selectedDateRange, selectedProperty, onAddBo
   const [infants, setInfants] = useState(0)
   const [pets, setPets] = useState(0)
   const [guestName, setGuestName] = useState('')
-  const [showEditView, setShowEditView] = useState(false)
-  const [newBooking, setNewBooking] = useState<Omit<Booking, 'id'> | null>(null)
-
-  const createBooking = (): Omit<Booking, 'id'> => {
-    return {
-      propertyId: properties.find(p => p.name === selectedProperty)?.id || 0,
-      guestName,
-      startDate: selectedDateRange.start,
-      endDate: selectedDateRange.end,
-      price: 75 // This is a placeholder price, you might want to calculate it based on the number of days and other factors
-    }
-  }
 
   const handleAddClose = () => {
     if (guestName) {
-      const booking = createBooking()
-      onAddBooking(booking)
+      onAddBooking({
+        propertyId: properties.find(p => p.name === selectedProperty)?.id || 0,
+        guestName,
+        startDate: selectedDateRange.start,
+        endDate: selectedDateRange.end,
+        price: 75 // This is a placeholder price, you might want to calculate it based on the number of days and other factors
+      })
       onClose()
     } else {
       alert('Please enter the guest name')
     }
-  }
-
-  const handleAddEdit = () => {
-    if (guestName) {
-      const booking = createBooking()
-      setNewBooking(booking)
-      setShowEditView(true)
-    } else {
-      alert('Please enter the guest name')
-    }
-  }
-
-  const handleSave = (updatedBooking: Booking) => {
-    onAddBooking(updatedBooking)
-    onClose()
-  }
-
-  if (showEditView) {
-    return (
-      <ReservationEditView
-        booking={newBooking ? { id: 0, ...newBooking } : null}
-        onClose={() => setShowEditView(false)}
-        onSave={handleSave}
-      />
-    )
   }
 
   return (
@@ -263,7 +215,7 @@ const ReservationForm = ({ onClose, selectedDateRange, selectedProperty, onAddBo
                 <input type="checkbox" className="form-checkbox" />
                 <span className="ml-2">Durchsuchbar</span>
               </label>
-              <button className="bg-blue-500 text-white p-2 rounded" onClick={handleAddEdit}>Add & Edit</button>
+              <button className="bg-blue-500 text-white p-2 rounded">Add & Edit</button>
               <button className="bg-blue-500 text-white p-2 rounded" onClick={handleAddClose}>Add & Close</button>
             </div>
           </div>
@@ -272,6 +224,21 @@ const ReservationForm = ({ onClose, selectedDateRange, selectedProperty, onAddBo
     </div>
   )
 }
+
+const properties = [
+  { id: 1, name: 'PARKPLATZ' },
+  { id: 2, name: 'I LOVE IS IN THE AIR' },
+  { id: 3, name: 'CRAZY LOVE' },
+  { id: 4, name: 'DREAM, DREAM, DREAM' },
+  { id: 5, name: 'MY ONLY SUNSHINE' },
+  { id: 6, name: 'MADE FOR ME AND YOU' },
+  { id: 7, name: 'WONDERFUL TONIGHT' },
+  { id: 8, name: 'WAITING FOR LOVE' },
+  { id: 9, name: 'SOUND OF LOVE' },
+  { id: 10, name: 'FEELING GOOD' },
+  { id: 11, name: 'FIELDS OF GOLD' },
+  { id: 12, name: 'LET THERE BE LOVE' },
+]
 
 export default function CalendarInterface() {
   const [currentDate, setCurrentDate] = useState(new Date())
@@ -453,7 +420,7 @@ export default function CalendarInterface() {
               <tr>
                 <th className="border-2 border-gray-300 p-2 w-48 bg-gray-100">Eigenschaften</th>
                 {dates.map((date) => (
-                  <th key={date.day} className="border-2 border-gray-300 p-2 w-72 bg-gray-100">
+                  <th key={date.day} className="border-2 border-gray-300 p-2 w-96 bg-gray-100">
                     <div>{date.weekday}</div>
                     <div>{date.day}</div>
                   </th>
@@ -480,17 +447,19 @@ export default function CalendarInterface() {
                     return (
                       <td 
                         key={date.day} 
-                        className={`border-2 border-gray-300 p-0 w-72 h-16 relative ${isSelected ? 'bg-blue-200' : ''}`}
+                        className={`border-2 border-gray-300 p-0 w-96 h-24 relative ${isSelected ? 'bg-blue-200' : ''}`}
                         onMouseDown={() => handleMouseDown(property.id, date.date)}
                         onMouseMove={() => handleMouseMove(date.date)}
                         onMouseUp={handleMouseUp}
                       >
                         {booking && (
                           <div 
-                            className={`absolute top-0 bottom-0 left-0 right-0 bg-blue-500 text-white text-sm p-1 flex items-center justify-center
+                            className={`absolute top-1 bottom-1 left-1 right-1 bg-blue-500 text-white text-sm p-1 flex items-center justify-center
+                              rounded-lg shadow-lg transform hover:scale-105 transition-transform duration-200
                               ${isFirstDay ? 'rounded-l-lg' : ''} ${isLastDay ? 'rounded-r-lg' : ''}`}
                             style={{
                               clipPath: isFirstDay ? 'inset(0 0 0 50%)' : isLastDay ? 'inset(0 50% 0 0)' : 'none',
+                              boxShadow: '0 4px 6px rgba(0, 0, 0, 0.1), 0 1px 3px rgba(0, 0, 0, 0.08)',
                             }}
                           >
                             <span className="truncate">{booking.guestName} - {booking.price}€</span>
